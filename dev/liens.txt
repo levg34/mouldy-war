@@ -1,0 +1,3 @@
+https://code-examples.net/en/docs/d3~5/d3-delaunay
+https://observablehq.com/@mbostock/hover-voronoi
+https://bl.ocks.org/mbostock/3680957
