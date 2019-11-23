@@ -36,15 +36,20 @@ function tracer(point) {
 	context.strokeStyle = '#00008B'
 	context.stroke()
 	
+	context.beginPath()
+	voronoi.renderCell(5, context)
+	context.fillStyle = '#663399'
+	context.fill()
+	
 	if (point) {
 		context.beginPath()
-		voronoi.renderCell(5, context)
-		context.fillStyle = '#663399'
+		voronoi.renderCell(13, context)
+		context.fillStyle = '#4169E1'
 		context.fill()
 		
 		context.beginPath()
 		context.arc(point[0], point[1], 5, 0, 2 * Math.PI, true)
-		context.fillStyle = '#4169E1'
+		// context.fillStyle = '#4169E1'
 		context.fill()
 	}
 }
