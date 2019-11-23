@@ -83,8 +83,6 @@ canvas.onmousemove = event => {
 	var rect = canvas.getBoundingClientRect()
     var souris = [event.clientX - rect.left, event.clientY - rect.top]
 	tracer(souris)
-	// voronoi.contains(i, x, y)
-    // tracer()
 }
 
 canvas.onclick = event => {
@@ -92,10 +90,20 @@ canvas.onclick = event => {
 	
 	var rect = canvas.getBoundingClientRect()
     var souris = [event.clientX - rect.left, event.clientY - rect.top]
-	joueur.polygones.push(indexPolygoneAuPoint(souris))
+	if (jouxtant(souris,joueur)) {
+		joueur.polygones.push(indexPolygoneAuPoint(souris))
+	}
 	tracer()
-	// voronoi.contains(i, x, y)
-    // tracer()
+}
+
+function jouxtant(point,joueur) {
+	var res = false
+	for (const voisin of delaunay.neighbors(indexPolygoneAuPoint(point))) {
+		if (joueur.polygones.indexOf(voisin) !==-1) {
+			res = true
+		}
+	}
+	return res
 }
 
 tracer()
