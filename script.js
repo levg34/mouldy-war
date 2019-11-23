@@ -28,12 +28,14 @@ const voronoi = delaunay.voronoi([0, 0, 960, 500])
 
 var violet = {
 	couleur : '#663399',
-	polygones :  [5,6,7]
+	polygones :  [5,...delaunay.neighbors(5)]
 }
+
+var premièreCase = Math.floor(Math.random()*points.length)
 
 var joueur = {
 	couleur : '#4169E1',
-	polygones :  [13]
+	polygones :  [premièreCase,...delaunay.neighbors(premièreCase)]
 }
 
 var entités = [violet,joueur]
