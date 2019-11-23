@@ -26,19 +26,36 @@ const points = chaos(quadrille(20,500,960),20)
 const delaunay = Delaunay.from(points)
 const voronoi = delaunay.voronoi([0, 0, 960, 500])
 
-var violet = {
-	couleur : '#663399',
-	polygones :  [5,...delaunay.neighbors(5)]
+var entités = []
+
+var montagne = {
+	nom : 'montagne',
+	couleur : 'black',
+	invincible : true,
+	polygones : points.filter(point => point[0] < 2*20 || point[1] < 2*20 || point[0] > 960-2*20 || point[1] > 500-2*20).map(point => indexPolygoneAuPoint(point))
 }
+
+entités.push(montagne)
+
+var premièreCaseViolet = Math.floor(Math.random()*points.length)
+
+var violet = {
+	nom : 'violet',
+	couleur : '#663399',
+	polygones :  [premièreCaseViolet,...delaunay.neighbors(premièreCaseViolet)].filter(polygone => polygoneDisponible(polygone))
+}
+
+entités.push(violet)
 
 var premièreCase = Math.floor(Math.random()*points.length)
 
 var joueur = {
+	nom : 'joueur',
 	couleur : '#4169E1',
-	polygones :  [premièreCase,...delaunay.neighbors(premièreCase)]
+	polygones :  [premièreCase,...delaunay.neighbors(premièreCase)].filter(polygone => polygoneDisponible(polygone))
 }
 
-var entités = [violet,joueur]
+entités.push(joueur)
 
 function tracer(point) {
 	context.clearRect(0,0,canvas.width,canvas.height)
@@ -69,6 +86,14 @@ function tracer(point) {
 	}
 }
 
+function polygoneDisponible(polygone) {
+	return entités.map(entité => entité.polygones).flat().indexOf(polygone) === -1
+}
+
+function polygoneInvincible(polygone) {
+	return entités.filter(entité => entité.invincible).map(entité => entité.polygones).flat().indexOf(polygone) !== -1
+}
+
 function indexPolygoneAuPoint(point) {
 	var index = -1
 	for (var i=0; i<points.length; ++i) {
@@ -93,9 +118,44 @@ canvas.onclick = event => {
 	var rect = canvas.getBoundingClientRect()
     var souris = [event.clientX - rect.left, event.clientY - rect.top]
 	if (jouxtant(souris,joueur)) {
-		joueur.polygones.push(indexPolygoneAuPoint(souris))
+		var polygone = indexPolygoneAuPoint(souris)
+		if (polygoneDisponible(polygone)) {
+			joueur.polygones.push(polygone)
+		} else {
+			if (!polygoneInvincible(polygone)) {
+				enleverPolygone(polygone)
+				joueur.polygones.push(polygone)
+			}
+		}
 	}
+	bougerIA()
 	tracer()
+}
+
+function enleverPolygone(polygone) {
+	var entité = entités.filter(_entité => _entité.polygones.indexOf(polygone) !== -1)[0]
+	if (entité && !entité.invincible) {
+		var index = entité.polygones.indexOf(polygone)
+		entité.polygones.splice(index, 1)
+	}
+}
+
+function bougerIA() {
+	var déplacementPossible
+	violet.polygones.some(polygone => {
+		for (const voisin of delaunay.neighbors(polygone)) {
+			if (polygoneDisponible(voisin)) {
+				déplacementPossible = voisin
+				break
+			}
+		}
+		return typeof déplacementPossible !== 'undefined'
+	})
+	if (typeof déplacementPossible !== 'undefined') {
+		violet.polygones.push(déplacementPossible)
+	} else {
+		alert('bravo, violet est bloqué !')
+	}
 }
 
 function jouxtant(point,joueur) {
