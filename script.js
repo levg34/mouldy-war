@@ -26,6 +26,18 @@ const points = chaos(quadrille(20,500,960),20)
 const delaunay = Delaunay.from(points)
 const voronoi = delaunay.voronoi([0, 0, 960, 500])
 
+var violet = {
+	couleur : '#663399',
+	polygones :  [5,6,7]
+}
+
+var joueur = {
+	couleur : '#4169E1',
+	polygones :  [13]
+}
+
+var entités = [violet,joueur]
+
 function tracer(point) {
 	context.clearRect(0,0,canvas.width,canvas.height)
 	
@@ -36,22 +48,33 @@ function tracer(point) {
 	context.strokeStyle = '#00008B'
 	context.stroke()
 	
-	context.beginPath()
-	voronoi.renderCell(5, context)
-	context.fillStyle = '#663399'
-	context.fill()
+	entités.forEach(entité => {
+		context.fillStyle = entité.couleur
+		entité.polygones.forEach(polygone => {
+			context.beginPath()
+			voronoi.renderCell(polygone, context)
+			context.fill()
+		})
+	})
 	
 	if (point) {
 		context.beginPath()
-		voronoi.renderCell(13, context)
-		context.fillStyle = '#4169E1'
+		voronoi.renderCell(indexPolygoneAuPoint(point), context)
+		context.fillStyle = joueur.couleur
+		context.globalAlpha = 0.5
 		context.fill()
-		
-		context.beginPath()
-		context.arc(point[0], point[1], 5, 0, 2 * Math.PI, true)
-		// context.fillStyle = '#4169E1'
-		context.fill()
+		context.globalAlpha = 1
 	}
+}
+
+function indexPolygoneAuPoint(point) {
+	var index = -1
+	for (var i=0; i<points.length; ++i) {
+		if (voronoi.contains(i, point[0], point[1])) {
+			index = i
+		}
+	}
+	return index
 }
 
 canvas.onmousemove = event => {
@@ -64,8 +87,15 @@ canvas.onmousemove = event => {
     // tracer()
 }
 
-function dessinerPoint(point) {
+canvas.onclick = event => {
+    event.preventDefault()
 	
+	var rect = canvas.getBoundingClientRect()
+    var souris = [event.clientX - rect.left, event.clientY - rect.top]
+	joueur.polygones.push(indexPolygoneAuPoint(souris))
+	tracer()
+	// voronoi.contains(i, x, y)
+    // tracer()
 }
 
 tracer()
