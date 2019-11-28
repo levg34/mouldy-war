@@ -1,13 +1,18 @@
+
 var canvas = document.getElementById('myCanvas')
 var context = canvas.getContext('2d')
 
-function quadrille(cote,hauteur,largeur) {
+var côtéQuadrillage = 20
+var hauteurQuadrillage = 500
+var largeurQuadrillage = 960
+
+function quadrille(côté,hauteur,largeur) {
 	if (!largeur) largeur = hauteur
 	var res = []
-	for (var n=1; n*cote<Math.max(largeur,hauteur); n++) {
-		for (var m=1;2*cote*n-m*cote>0;m++) {
-			if (m*cote < largeur && 2*cote*n-m*cote < hauteur) {
-				res.push([m*cote,2*cote*n-m*cote])
+	for (var n=1; n*côté<Math.max(largeur,hauteur); n++) {
+		for (var m=1;2*côté*n-m*côté>0;m++) {
+			if (m*côté < largeur && 2*côté*n-m*côté < hauteur) {
+				res.push([m*côté,2*côté*n-m*côté])
 			}
 		}
 	}
@@ -22,9 +27,9 @@ function chaos(points,amplitude) {
 	return res
 }
 
-const points = chaos(quadrille(20,500,960),20)
+const points = chaos(quadrille(côtéQuadrillage,hauteurQuadrillage,largeurQuadrillage),côtéQuadrillage)
 const delaunay = Delaunay.from(points)
-const voronoi = delaunay.voronoi([0, 0, 960, 500])
+const voronoi = delaunay.voronoi([0, 0, largeurQuadrillage, hauteurQuadrillage])
 
 var entités = []
 
@@ -32,7 +37,7 @@ var montagne = {
 	nom : 'montagne',
 	couleur : 'black',
 	invincible : true,
-	polygones : points.filter(point => point[0] < 2*20 || point[1] < 2*20 || point[0] > 960-2*20 || point[1] > 500-2*20).map(point => indexPolygoneAuPoint(point))
+	polygones : points.filter(point => point[0] < côtéQuadrillage+(côtéQuadrillage/2) || point[1] < côtéQuadrillage+(côtéQuadrillage/2) || point[0] > largeurQuadrillage-(côtéQuadrillage+(côtéQuadrillage/2)) || point[1] > hauteurQuadrillage-(côtéQuadrillage+(côtéQuadrillage/2))).map(point => indexPolygoneAuPoint(point))
 }
 
 entités.push(montagne)
