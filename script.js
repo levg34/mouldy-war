@@ -1,4 +1,3 @@
-
 var canvas = document.getElementById('myCanvas')
 var context = canvas.getContext('2d')
 
@@ -7,6 +6,9 @@ var quadrillage = {
 	hauteur: 500,
 	largeur: 960
 }
+
+canvas.setAttribute('height', quadrillage.hauteur)
+canvas.setAttribute('width', quadrillage.largeur)
 
 function quadrille(côté,hauteur,largeur) {
 	if (!largeur) largeur = hauteur
@@ -65,7 +67,7 @@ var joueur = {
 entités.push(joueur)
 
 function tracer(point) {
-	context.clearRect(0,0,canvas.width,canvas.height)
+	context.clearRect(0,0,quadrillage.largeur,quadrillage.hauteur)
 	
 	// voronoi.update()
 	
