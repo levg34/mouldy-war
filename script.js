@@ -3,8 +3,8 @@ var context = canvas.getContext('2d')
 
 var quadrillage = {
 	côté: 20,
-	hauteur: 500,
-	largeur: 960
+	hauteur: window.innerHeight,
+	largeur: window.innerWidth
 }
 
 canvas.setAttribute('height', quadrillage.hauteur)
