@@ -10,6 +10,8 @@ Sinon pour la dernière version estampillée, il faut télécharger le zip de la
 
 Vous êtes le joueur bleu, et vous jouez contre l'IA (pour l'instant plus artificielle qu'intelligente), qui contrôle les cases violettes. Il faut cliquer sur une case contiguë au territoire bleu (le vôtre) pour l'étendre.
 
+La montagne (noire) est indestructible.
+
 ## But du jeu
 ### Version 0.1
 Bloquer l'IA (violette) en faisant en sorte que plus aucun coup ne soit possible.
