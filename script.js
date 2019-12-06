@@ -99,11 +99,13 @@ function tracer(point) {
 	
 	// voronoi.update()
 	
+	// Tracé des côtés des polygones
 	context.beginPath()
 	voronoi.render(context)
 	context.strokeStyle = '#00008B'
 	context.stroke()
 	
+	// Tracé des entités
 	entités.forEach(entité => {
 		context.fillStyle = entité.couleur
 		entité.polygones.forEach(polygone => {
@@ -113,11 +115,18 @@ function tracer(point) {
 		})
 	})
 	
+	// Tracé de survol de la souris
 	if (point) {
+		var polygone = indexPolygoneAuPoint(point)
+		if (polygoneInvincible(polygone) || joueur.polygones.indexOf(polygone) !== -1 || !jouxtant(point,joueur)) return
 		context.beginPath()
-		voronoi.renderCell(indexPolygoneAuPoint(point), context)
-		context.fillStyle = joueur.couleur
-		context.globalAlpha = 0.5
+		voronoi.renderCell(polygone, context)
+		if (!polygoneDisponible(polygone)) {
+			context.fillStyle = 'red'
+		} else {
+			context.fillStyle = joueur.couleur
+		}
+		context.globalAlpha = 0.6
 		context.fill()
 		context.globalAlpha = 1
 	}
