@@ -118,7 +118,7 @@ function tracer(point) {
 	// Tracé de survol de la souris
 	if (point) {
 		var polygone = indexPolygoneAuPoint(point)
-		if (polygoneInvincible(polygone) || joueur.polygones.indexOf(polygone) !== -1 || !jouxtant(point,joueur)) return
+		if (polygoneInvincible(polygone) || joueur.polygones.includes(polygone) || !jouxtant(point,joueur)) return
 		context.beginPath()
 		voronoi.renderCell(polygone, context)
 		if (!polygoneDisponible(polygone)) {
@@ -133,11 +133,11 @@ function tracer(point) {
 }
 
 function polygoneDisponible(polygone) {
-	return entités.map(entité => entité.polygones).flat().indexOf(polygone) === -1
+	return !entités.map(entité => entité.polygones).flat().includes(polygone)
 }
 
 function polygoneInvincible(polygone) {
-	return entités.filter(entité => entité.invincible).map(entité => entité.polygones).flat().indexOf(polygone) !== -1
+	return entités.filter(entité => entité.invincible).map(entité => entité.polygones).flat().includes(polygone)
 }
 
 function polygoneDisponibleAléatoire() {
@@ -206,7 +206,7 @@ function enleverEntité(entité) {
 }
 
 function entitéAuPolygone(polygone) {
-	return entités.filter(_entité => _entité.polygones.indexOf(polygone) !== -1)[0]
+	return entités.filter(_entité => _entité.polygones.includes(polygone))[0]
 }
 
 function bougerIA() {
