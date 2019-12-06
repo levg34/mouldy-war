@@ -46,25 +46,53 @@ var montagne = {
 
 entités.push(montagne)
 
-var premièreCaseViolet = Math.floor(Math.random()*points.length)
+var premièreCaseViolet = polygoneDisponibleAléatoire()
 
 var violet = {
 	nom : 'violet',
 	couleur : '#663399',
+	mobile : true,
 	polygones :  [premièreCaseViolet,...delaunay.neighbors(premièreCaseViolet)].filter(polygone => polygoneDisponible(polygone))
 }
 
 entités.push(violet)
 
-var premièreCase = Math.floor(Math.random()*points.length)
+var premièreCase = polygoneDisponibleAléatoire()
 
 var joueur = {
 	nom : 'joueur',
 	couleur : '#4169E1',
+	joueur : true,
 	polygones :  [premièreCase,...delaunay.neighbors(premièreCase)].filter(polygone => polygoneDisponible(polygone))
 }
 
 entités.push(joueur)
+
+function getRandomColor() {
+	var letters = '0123456789ABCDEF';
+	var color = '#';
+	for (var i = 0; i < 6; i++) {
+		color += letters[Math.floor(Math.random() * 16)];
+	}
+	return color;
+}
+
+function ajouterUnité(mobile) {
+	var premièreCase = polygoneDisponibleAléatoire()
+
+	var unité = {
+		nom : 'unité_'+entités.length,
+		couleur : getRandomColor(),
+		mobile : mobile,
+		polygones :  [premièreCase,...delaunay.neighbors(premièreCase)].filter(polygone => polygoneDisponible(polygone))
+	}
+
+	entités.push(unité)
+}
+
+ajouterUnité(true)
+ajouterUnité(true)
+ajouterUnité()
 
 function tracer(point) {
 	context.clearRect(0,0,quadrillage.largeur,quadrillage.hauteur)
@@ -103,6 +131,11 @@ function polygoneInvincible(polygone) {
 	return entités.filter(entité => entité.invincible).map(entité => entité.polygones).flat().indexOf(polygone) !== -1
 }
 
+function polygoneDisponibleAléatoire() {
+	var casesDisponibles = [...points.keys()].filter(polygone => polygoneDisponible(polygone))
+	return casesDisponibles[Math.floor((Math.random()*casesDisponibles.length))]
+}
+
 function indexPolygoneAuPoint(point) {
 	var index = -1
 	for (var i=0; i<points.length; ++i) {
@@ -114,18 +147,18 @@ function indexPolygoneAuPoint(point) {
 }
 
 canvas.onmousemove = event => {
-    event.preventDefault()
+	event.preventDefault()
 	
 	var rect = canvas.getBoundingClientRect()
-    var souris = [event.clientX - rect.left, event.clientY - rect.top]
+	var souris = [event.clientX - rect.left, event.clientY - rect.top]
 	tracer(souris)
 }
 
 canvas.onclick = event => {
-    event.preventDefault()
+	event.preventDefault()
 	
 	var rect = canvas.getBoundingClientRect()
-    var souris = [event.clientX - rect.left, event.clientY - rect.top]
+	var souris = [event.clientX - rect.left, event.clientY - rect.top]
 	if (jouxtant(souris,joueur)) {
 		var polygone = indexPolygoneAuPoint(souris)
 		if (polygoneDisponible(polygone)) {
@@ -150,21 +183,26 @@ function enleverPolygone(polygone) {
 }
 
 function bougerIA() {
-	var déplacementPossible
-	violet.polygones.some(polygone => {
-		for (const voisin of delaunay.neighbors(polygone)) {
-			if (polygoneDisponible(voisin)) {
-				déplacementPossible = voisin
-				break
+	entités.forEach(entité => {
+		if (entité.mobile) {
+			var déplacementPossible
+			entité.polygones.some(polygone => {
+				for (const voisin of delaunay.neighbors(polygone)) {
+					if (polygoneDisponible(voisin)) {
+						déplacementPossible = voisin
+						break
+					}
+				}
+				return typeof déplacementPossible !== 'undefined'
+			})
+			if (typeof déplacementPossible !== 'undefined') {
+				entité.polygones.push(déplacementPossible)
+			} else {
+				alert('bravo, '+entité.nom+' est bloqué !')
+				entité.mobile = false
 			}
 		}
-		return typeof déplacementPossible !== 'undefined'
 	})
-	if (typeof déplacementPossible !== 'undefined') {
-		violet.polygones.push(déplacementPossible)
-	} else {
-		alert('bravo, violet est bloqué !')
-	}
 }
 
 function jouxtant(point,joueur) {
