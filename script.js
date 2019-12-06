@@ -174,8 +174,7 @@ canvas.onclick = event => {
 			joueur.polygones.push(polygone)
 		} else {
 			if (!polygoneInvincible(polygone)) {
-				enleverPolygone(polygone)
-				joueur.polygones.push(polygone)
+				combat(polygone,joueur)
 			}
 		}
 	}
@@ -183,12 +182,31 @@ canvas.onclick = event => {
 	tracer()
 }
 
+function combat(polygone,attaquant) {
+	var attaqueRéussie = !polygoneInvincible(polygone)
+	if (attaqueRéussie) {
+		enleverPolygone(polygone)
+		attaquant.polygones.push(polygone)
+	}
+}
+
 function enleverPolygone(polygone) {
-	var entité = entités.filter(_entité => _entité.polygones.indexOf(polygone) !== -1)[0]
+	var entité = entitéAuPolygone(polygone)
 	if (entité && !entité.invincible) {
 		var index = entité.polygones.indexOf(polygone)
 		entité.polygones.splice(index, 1)
 	}
+	if (entité.polygones.length === 0) {
+		enleverEntité(entité)
+	}
+}
+
+function enleverEntité(entité) {
+	alert(entité.nom+' a perdu.')
+}
+
+function entitéAuPolygone(polygone) {
+	return entités.filter(_entité => _entité.polygones.indexOf(polygone) !== -1)[0]
 }
 
 function bougerIA() {
