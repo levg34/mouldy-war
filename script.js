@@ -62,7 +62,7 @@ var premièreCase = polygoneDisponibleAléatoire()
 var joueur = {
 	nom : 'joueur',
 	couleur : '#4169E1',
-	joueur : true,
+	joueur : true, // non utilisé
 	polygones :  [premièreCase,...delaunay.neighbors(premièreCase)].filter(polygone => polygoneDisponible(polygone))
 }
 
@@ -183,7 +183,21 @@ canvas.onclick = event => {
 }
 
 function combat(polygone,attaquant) {
-	var attaqueRéussie = !polygoneInvincible(polygone)
+	if (polygoneInvincible(polygone)) return
+	var défendant = entitéAuPolygone(polygone)
+	var attaqueRéussie
+	var appuiAttaque = 0
+	var appuiDéfense = 0
+	défendant.attaqué = polygone
+	for (const voisin of delaunay.neighbors(polygone)) {
+		if (attaquant.polygones.includes(voisin)) {
+			++appuiAttaque
+		} else if (défendant.polygones.includes(voisin)) {
+			++appuiDéfense
+		}
+	}
+	coefVictoire = (appuiAttaque+0.5)/(appuiAttaque+appuiDéfense+0.5)
+	attaqueRéussie = Math.random() < coefVictoire
 	if (attaqueRéussie) {
 		enleverPolygone(polygone)
 		attaquant.polygones.push(polygone)
@@ -230,6 +244,7 @@ function bougerIA() {
 				alert('bravo, '+entité.nom+' est bloqué !')
 				entité.mobile = false
 			}
+			delete entité.attaqué
 		}
 	})
 }
