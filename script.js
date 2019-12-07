@@ -62,7 +62,7 @@ var premièreCase = polygoneDisponibleAléatoire()
 var joueur = {
 	nom : 'joueur',
 	couleur : '#4169E1',
-	joueur : true, // non utilisé
+	joueur : true,
 	polygones :  [premièreCase,...delaunay.neighbors(premièreCase)].filter(polygone => polygoneDisponible(polygone))
 }
 
@@ -187,7 +187,7 @@ function combat(polygone,attaquant) {
 	var défendant = entitéAuPolygone(polygone)
 	var attaqueRéussie
 	var appuiAttaque = 0
-	var appuiDéfense = 0
+	var appuiDéfense = 1
 	défendant.attaqué = polygone
 	for (const voisin of delaunay.neighbors(polygone)) {
 		if (attaquant.polygones.includes(voisin)) {
@@ -196,7 +196,7 @@ function combat(polygone,attaquant) {
 			++appuiDéfense
 		}
 	}
-	coefVictoire = (appuiAttaque+0.5)/(appuiAttaque+appuiDéfense+0.5)
+	coefVictoire = appuiAttaque/(appuiAttaque+appuiDéfense)
 	attaqueRéussie = Math.random() < coefVictoire
 	if (attaqueRéussie) {
 		enleverPolygone(polygone)
@@ -226,8 +226,26 @@ function entitéAuPolygone(polygone) {
 }
 
 function bougerIA() {
-	entités.forEach(entité => {
-		if (entité.mobile) {
+	entités.filter(entité => !entité.joueur).forEach(entité => {
+		if (entité.attaqué) {
+			var polygone = entité.attaqué
+			var voisins = [...delaunay.neighbors(polygone)]
+			var déplacementsPacifiques = voisins.filter(voisin => polygoneDisponible(voisin))
+			var déplacementsGuerriers = voisins.filter(voisin => !entité.polygones.includes(voisin))
+			if (!entité.polygones.includes(polygone)) {
+				var polygonesAmis = voisins.filter(voisin => entité.polygones.includes(voisin))
+				var nouveauDépart = polygonesAmis[0]
+				var nouveauxVoisins = [...delaunay.neighbors(nouveauDépart)]
+				déplacementsPacifiques = nouveauxVoisins.filter(voisin => polygoneDisponible(voisin))
+				déplacementsGuerriers = nouveauxVoisins.filter(voisin => !entité.polygones.includes(voisin))
+			}
+			if (déplacementsPacifiques.length > 0) {
+				entité.polygones.push(déplacementsPacifiques[0])
+			} else {
+				combat(déplacementsGuerriers[0],entité)
+			}
+			delete entité.attaqué
+		} else if (entité.mobile) {
 			var déplacementPossible
 			entité.polygones.some(polygone => {
 				for (const voisin of delaunay.neighbors(polygone)) {
@@ -244,7 +262,6 @@ function bougerIA() {
 				alert('bravo, '+entité.nom+' est bloqué !')
 				entité.mobile = false
 			}
-			delete entité.attaqué
 		}
 	})
 }
@@ -252,7 +269,7 @@ function bougerIA() {
 function jouxtant(point,joueur) {
 	var res = false
 	for (const voisin of delaunay.neighbors(indexPolygoneAuPoint(point))) {
-		if (joueur.polygones.indexOf(voisin) !==-1) {
+		if (joueur.polygones.includes(voisin)) {
 			res = true
 		}
 	}
