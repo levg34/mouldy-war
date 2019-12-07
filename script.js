@@ -227,40 +227,32 @@ function entitéAuPolygone(polygone) {
 
 function bougerIA() {
 	entités.filter(entité => !entité.joueur).forEach(entité => {
-		if (entité.attaqué) {
-			var polygone = entité.attaqué
-			var voisins = [...delaunay.neighbors(polygone)]
-			var déplacementsPacifiques = voisins.filter(voisin => polygoneDisponible(voisin))
-			var déplacementsGuerriers = voisins.filter(voisin => !entité.polygones.includes(voisin))
-			if (!entité.polygones.includes(polygone)) {
-				var polygonesAmis = voisins.filter(voisin => entité.polygones.includes(voisin))
-				var nouveauDépart = polygonesAmis[0]
-				var nouveauxVoisins = [...delaunay.neighbors(nouveauDépart)]
-				déplacementsPacifiques = nouveauxVoisins.filter(voisin => polygoneDisponible(voisin))
-				déplacementsGuerriers = nouveauxVoisins.filter(voisin => !entité.polygones.includes(voisin))
+		if (entité.attaqué || entité.mobile) {
+			var déplacementsPacifiques
+			var déplacementsGuerriers
+			if (entité.attaqué) {
+				var polygone = entité.attaqué
+				var voisins = [...delaunay.neighbors(polygone)]
+				déplacementsPacifiques = voisins.filter(voisin => polygoneDisponible(voisin))
+				déplacementsGuerriers = voisins.filter(voisin => !entité.polygones.includes(voisin))
+				if (!entité.polygones.includes(polygone)) {
+					var polygonesAmis = voisins.filter(voisin => entité.polygones.includes(voisin))
+					var nouveauDépart = polygonesAmis[0]
+					var nouveauxVoisins = [...delaunay.neighbors(nouveauDépart)]
+					déplacementsPacifiques = nouveauxVoisins.filter(voisin => polygoneDisponible(voisin))
+					déplacementsGuerriers = nouveauxVoisins.filter(voisin => !entité.polygones.includes(voisin))
+				}
+				delete entité.attaqué
+			} else if (entité.mobile) {
+				var départsPossibles = entité.polygones.filter(polygone => [...delaunay.neighbors(polygone)].filter(voisin => !entité.polygones.includes(voisin) && !polygoneInvincible(voisin)).length > 0)
+				var déplacementsPossibles = départsPossibles.map(polygone => [...delaunay.neighbors(polygone)].filter(voisin => !entité.polygones.includes(voisin))).flat()
+				déplacementsPacifiques = déplacementsPossibles.filter(polygone => polygoneDisponible(polygone))
+				déplacementsGuerriers = déplacementsPossibles
 			}
 			if (déplacementsPacifiques.length > 0) {
 				entité.polygones.push(déplacementsPacifiques[0])
 			} else {
 				combat(déplacementsGuerriers[0],entité)
-			}
-			delete entité.attaqué
-		} else if (entité.mobile) {
-			var déplacementPossible
-			entité.polygones.some(polygone => {
-				for (const voisin of delaunay.neighbors(polygone)) {
-					if (polygoneDisponible(voisin)) {
-						déplacementPossible = voisin
-						break
-					}
-				}
-				return typeof déplacementPossible !== 'undefined'
-			})
-			if (typeof déplacementPossible !== 'undefined') {
-				entité.polygones.push(déplacementPossible)
-			} else {
-				alert('bravo, '+entité.nom+' est bloqué !')
-				entité.mobile = false
 			}
 		}
 	})
