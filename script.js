@@ -183,7 +183,21 @@ canvas.onclick = event => {
 }
 
 function combat(polygone,attaquant) {
-	var attaqueRéussie = !polygoneInvincible(polygone)
+	if (polygoneInvincible(polygone)) return
+	var défendant = entitéAuPolygone(polygone)
+	var attaqueRéussie
+	var appuiAttaque = 0
+	var appuiDéfense = 1
+	défendant.attaqué = polygone
+	for (const voisin of delaunay.neighbors(polygone)) {
+		if (attaquant.polygones.includes(voisin)) {
+			++appuiAttaque
+		} else if (défendant.polygones.includes(voisin)) {
+			++appuiDéfense
+		}
+	}
+	coefVictoire = appuiAttaque/(appuiAttaque+appuiDéfense)
+	attaqueRéussie = Math.random() < coefVictoire
 	if (attaqueRéussie) {
 		enleverPolygone(polygone)
 		attaquant.polygones.push(polygone)
@@ -212,23 +226,33 @@ function entitéAuPolygone(polygone) {
 }
 
 function bougerIA() {
-	entités.forEach(entité => {
-		if (entité.mobile) {
-			var déplacementPossible
-			entité.polygones.some(polygone => {
-				for (const voisin of delaunay.neighbors(polygone)) {
-					if (polygoneDisponible(voisin)) {
-						déplacementPossible = voisin
-						break
-					}
+	entités.filter(entité => !entité.joueur).forEach(entité => {
+		if (entité.attaqué || entité.mobile) {
+			var déplacementsPacifiques
+			var déplacementsGuerriers
+			if (entité.attaqué) {
+				var polygone = entité.attaqué
+				var voisins = [...delaunay.neighbors(polygone)]
+				déplacementsPacifiques = voisins.filter(voisin => polygoneDisponible(voisin))
+				déplacementsGuerriers = voisins.filter(voisin => !entité.polygones.includes(voisin))
+				if (!entité.polygones.includes(polygone)) {
+					var polygonesAmis = voisins.filter(voisin => entité.polygones.includes(voisin))
+					var nouveauDépart = polygonesAmis[0]
+					var nouveauxVoisins = [...delaunay.neighbors(nouveauDépart)]
+					déplacementsPacifiques = nouveauxVoisins.filter(voisin => polygoneDisponible(voisin))
+					déplacementsGuerriers = nouveauxVoisins.filter(voisin => !entité.polygones.includes(voisin))
 				}
-				return typeof déplacementPossible !== 'undefined'
-			})
-			if (typeof déplacementPossible !== 'undefined') {
-				entité.polygones.push(déplacementPossible)
+				delete entité.attaqué
+			} else if (entité.mobile) {
+				var départsPossibles = entité.polygones.filter(polygone => [...delaunay.neighbors(polygone)].filter(voisin => !entité.polygones.includes(voisin) && !polygoneInvincible(voisin)).length > 0)
+				var déplacementsPossibles = départsPossibles.map(polygone => [...delaunay.neighbors(polygone)].filter(voisin => !entité.polygones.includes(voisin))).flat()
+				déplacementsPacifiques = déplacementsPossibles.filter(polygone => polygoneDisponible(polygone))
+				déplacementsGuerriers = déplacementsPossibles
+			}
+			if (déplacementsPacifiques.length > 0) {
+				entité.polygones.push(déplacementsPacifiques[0])
 			} else {
-				alert('bravo, '+entité.nom+' est bloqué !')
-				entité.mobile = false
+				combat(déplacementsGuerriers[0],entité)
 			}
 		}
 	})
@@ -237,7 +261,7 @@ function bougerIA() {
 function jouxtant(point,joueur) {
 	var res = false
 	for (const voisin of delaunay.neighbors(indexPolygoneAuPoint(point))) {
-		if (joueur.polygones.indexOf(voisin) !==-1) {
+		if (joueur.polygones.includes(voisin)) {
 			res = true
 		}
 	}
