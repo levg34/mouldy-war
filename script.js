@@ -62,7 +62,7 @@ var premièreCase = polygoneDisponibleAléatoire()
 var joueur = {
 	nom : 'joueur',
 	couleur : '#4169E1',
-	joueur : true,
+	joueur : true, // non utilisé
 	polygones :  [premièreCase,...delaunay.neighbors(premièreCase)].filter(polygone => polygoneDisponible(polygone))
 }
 
