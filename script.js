@@ -203,6 +203,8 @@ function enleverPolygone(polygone) {
 
 function enleverEntité(entité) {
 	alert(entité.nom+' a perdu.')
+	var index = entités.indexOf(entité)
+	entités.splice(index, 1)
 }
 
 function entitéAuPolygone(polygone) {
