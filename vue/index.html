@@ -1,8 +1,14 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+ 
+  <body>
+    <canvas id="myCanvas" style="border:1px solid #000000;">
+    Your browser does not support the HTML5 canvas tag.
+    </canvas>
+  </body>
+</html>
 <script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io.connect('http://localhost');
-  socket.on('news', function (data) {
-    console.log(data);
-    socket.emit('my other event', { my: 'data' });
-  });
-</script>
+<script type="text/javascript" src="/js/libs/d3-delaunay.js"></script>
+<script type="text/javascript" src="/js/script.js"></script>
