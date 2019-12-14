@@ -1,0 +1,23 @@
+{
+  "name": "mouldy-war",
+  "version": "1.0.0",
+  "description": "Ceci est un jeu de stratégie de contrôle du territoire. Le but va évoluer au fur et à mesure des versions.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"pas de tests !\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/levg34/mouldy-war.git"
+  },
+  "author": "levg34",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/levg34/mouldy-war/issues"
+  },
+  "homepage": "https://github.com/levg34/mouldy-war#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}
